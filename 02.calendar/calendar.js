@@ -8,12 +8,13 @@ const firstDay = luxon.DateTime.fromObject({
 
 const lastDay = firstDay.endOf('month')
 
-console.log(lastDay)
-
 printHeader()
+
 for (let date = firstDay.day; date <= lastDay.day; date++) {
-  format(date)
-  if (date % 7 === 0) {
+  const currentDate = firstDay.plus({ day: date - 1 })
+
+  formatDate(date)
+  if (currentDate.weekdayShort === 'Sat') {
     console.log(String(date))
   } else {
     process.stdout.write(String(date))
@@ -22,11 +23,14 @@ for (let date = firstDay.day; date <= lastDay.day; date++) {
 console.log('\n')
 
 function printHeader () {
-  console.log('  　　2022年 5月')
+  console.log('      ' + firstDay.year + '年' + firstDay.month + '月')
   console.log(' 日 月 火 水 木 金 土')
+  if (firstDay.weekdayShort !== 'Sun') {
+    process.stdout.write(String(' ').repeat(firstDay.weekday * 3))
+  }
 }
 
-function format (date) {
+function formatDate (date) {
   if (date < 10) {
     process.stdout.write(String('  '))
   } else {
