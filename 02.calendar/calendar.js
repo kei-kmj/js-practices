@@ -28,7 +28,7 @@ function main () {
 }
 
 function printHeader () {
-  console.log('      ' + firstDay.year + '年 ' + firstDay.month + '月')
+  console.log('      ' + firstDay.month + '月 ' + firstDay.year)
   console.log(' 日 月 火 水 木 金 土')
   if (firstDay.weekdayShort !== 'Sun') {
     process.stdout.write(String(' ').repeat(firstDay.weekday * 3))
