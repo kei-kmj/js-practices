@@ -1,5 +1,17 @@
+const luxon = require('luxon')
+
+const firstDay = luxon.DateTime.fromObject({
+  year: 2022,
+  month: 5,
+  day: 1
+})
+
+const lastDay = firstDay.endOf('month')
+
+console.log(lastDay)
+
 printHeader()
-for (let date = 1; date <= 31; date++) {
+for (let date = firstDay.day; date <= lastDay.day; date++) {
   format(date)
   if (date % 7 === 0) {
     console.log(String(date))
