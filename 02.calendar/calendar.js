@@ -12,19 +12,8 @@ const lastDay = firstDay.endOf('month')
 
 function main () {
   printHeader()
-
-  for (let date = firstDay.day; date <= lastDay.day; date++) {
-    const currentDate = firstDay.plus({ day: date - 1 })
-
-    if (currentDate.weekdayShort === 'Sat') {
-      console.log(String(date).padStart(3, ' '))
-    } else {
-      process.stdout.write(String(date).padStart(3, ' '))
-    }
-  }
-  if (lastDay.weekdayShort !== 'Sat') {
-    process.stdout.write('\n')
-  }
+  printBody()
+  printFooter()
 }
 
 function printHeader () {
@@ -35,4 +24,21 @@ function printHeader () {
   }
 }
 
+function printBody () {
+  for (let date = firstDay.day; date <= lastDay.day; date++) {
+    const currentDate = firstDay.plus({ day: date - 1 })
+
+    if (currentDate.weekdayShort === 'Sat') {
+      console.log(String(date).padStart(3, ' '))
+    } else {
+      process.stdout.write(String(date).padStart(3, ' '))
+    }
+  }
+}
+
+function printFooter () {
+  if (lastDay.weekdayShort !== 'Sat') {
+    process.stdout.write('\n')
+  }
+}
 main()
