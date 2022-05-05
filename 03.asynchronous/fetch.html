@@ -1,0 +1,11 @@
+﻿<!DOCTYPE html>
+<script>
+  async function myFetch() {
+    const response = await fetch("https://bootcamp.fjord.jp", {
+      method: "GET"
+    })
+    console.log( await response.text())
+  }
+
+  myFetch()
+</script>
