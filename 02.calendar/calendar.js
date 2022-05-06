@@ -28,10 +28,9 @@ function printBody () {
   for (let date = firstDay.day; date <= lastDay.day; date++) {
     const currentDate = firstDay.plus({ day: date - 1 })
 
+    process.stdout.write(String(date).padStart(3, ' '))
     if (currentDate.weekdayShort === 'Sat') {
-      console.log(String(date).padStart(3, ' '))
-    } else {
-      process.stdout.write(String(date).padStart(3, ' '))
+      process.stdout.write('\n')
     }
   }
 }
@@ -41,4 +40,5 @@ function printFooter () {
     process.stdout.write('\n')
   }
 }
+
 main()
