@@ -1,12 +1,32 @@
-﻿class DBAccessor {
+﻿const command = require("commander")
+const Enquirer = require('enquirer')
+
+class DBAccessor {
   static load() {
-    console.log('データベースにアクセスするクラスです')
+    const sqlite3 = require('sqlite3').verbose()
+    const db = new sqlite3.Database('memo.sqlite')
+    db.all('SELECT id, content from memos', (err, rows) => {
+      console.log(Object.values(rows))
+      return Object.values(rows)
+    })
   }
 }
 
 class Memos {
+
   index() {
-    console.log('一覧を表示します')
+
+    (async () => {
+          const menu = ['とんかつ', 'ハンバーグ', 'からあげ', 'カレーライス', '生姜焼き']
+          const question = {
+            type: 'select',
+            name: 'favorite',
+            choices: menu
+          }
+          const answer = await Enquirer.prompt(question)
+          console.log(`${answer.favorite}？`)
+        }
+    )()
   }
 
   show() {
@@ -25,16 +45,16 @@ class Memos {
 DBAccessor.load()
 const memos = new Memos()
 
-const command = require("commander")
+
 command
-    .option('-l, --index')
+    .option('-l, --lines')
     .option('-r, --read')
     .option('-d, --destroy')
 
 command.parse(process.argv);
 
 const options = command.opts();
-if (options.index) {
+if (options.lines) {
   memos.index()
 } else if (options.read) {
   memos.show()
