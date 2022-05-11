@@ -1,61 +1,62 @@
 ﻿const command = require("commander")
 const Enquirer = require('enquirer')
+const util = require("util");
 
 class DBAccessor {
   static load() {
-    const sqlite3 = require('sqlite3').verbose()
-    const db = new sqlite3.Database('memo.sqlite')
-    db.all('SELECT id, content from memos', (err, rows) => {
-      console.log(Object.values(rows))
-      return Object.values(rows)
-    })
+
   }
 }
 
 class Memos {
-
   index() {
+    const sqlite3 = require('sqlite3').verbose()
+    const db = new sqlite3.Database('memo.sqlite')
 
-    (async () => {
-          const menu = ['とんかつ', 'ハンバーグ', 'からあげ', 'カレーライス', '生姜焼き']
-          const question = {
-            type: 'select',
-            name: 'favorite',
-            choices: menu
-          }
-          const answer = await Enquirer.prompt(question)
-          console.log(`${answer.favorite}？`)
-        }
-    )()
+    db.all('SELECT id, content from memos', (err, rows) => {
+      if (err) {
+        console.log(err)
+        return
+      }
+      rows.forEach((row) => {
+        console.log(row.id + ' : ' + row.content.split('\n')[0])
+      })
+    })
   }
 
   show() {
     console.log('詳細を表示します')
   }
 
-  create() {
-    console.log('新規作成します')
+  async create() {
+    const sqlite3 = require('sqlite3').verbose()
+    const db = new sqlite3.Database('memo.sqlite')
+    const statement = db.prepare('INSERT INTO memos (content) VALUES(?)')
+    await util.promisify(statement.run.bind(statement))('みなもと　太郎')
   }
 
-  destroy() {
-    console.log('削除します')
+  async destroy() {
+    const sqlite3 = require('sqlite3').verbose()
+    const db = new sqlite3.Database('memo.sqlite')
+    const dbRun = util.promisify(db.run.bind(db))
+    await dbRun('DELETE FROM memos WHERE id = ?', 9)
+
   }
 }
 
 DBAccessor.load()
+
 const memos = new Memos()
-
-
 command
     .option('-l, --lines')
     .option('-r, --read')
     .option('-d, --destroy')
 
-command.parse(process.argv);
+command.parse(process.argv)
 
-const options = command.opts();
-if (options.lines) {
-  memos.index()
+const options = command.opts()
+
+if (options.lines) {memos.index()
 } else if (options.read) {
   memos.show()
 } else if (options.destroy) {
