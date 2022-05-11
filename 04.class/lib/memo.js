@@ -1,6 +1,7 @@
 ﻿const command = require("commander")
 const Enquirer = require('enquirer')
 const util = require("util");
+ // const {prompt} = require("enquirer");
 
 
 function DBAccessor() {
@@ -35,7 +36,7 @@ class Memos {
     } else {
       const answer = await Enquirer.prompt(question_show)
       const db = DBAccessor()
-      db.all('SELECT id, content from memos WHERE id = ?',answer.show, (err, rows) => {
+      db.all('SELECT id, content from memos WHERE id = ?', answer.show, (err, rows) => {
         if (err) {
           console.log(err)
           return
@@ -47,12 +48,22 @@ class Memos {
     }
   }
 
-  async create() {
-    const db = DBAccessor()
-    //const statement = db.prepare('INSERT INTO memos (content) VALUES(?)')
-    //await util.promisify(statement.run.bind(statement))('太田　モアレ')
-    const statement = db.prepare('INSERT INTO memos VALUES(?,?)')
-    await util.promisify(statement.run.bind(statement))(8, '池田理代子\nベルサイユのばら')
+  create() {
+
+    process.stdin.resume()
+    process.stdin.setEncoding('utf8')
+    let new_memo = ''
+    console.log('新しいメモを作成します')
+    process.stdin.on('data', function (chunk) {
+      new_memo += chunk
+    })
+
+    process.stdin.on('end', async function () {
+      const db = DBAccessor()
+      const statement = db.prepare('INSERT INTO memos (content) VALUES(?)')
+      await util.promisify(statement.run.bind(statement))(new_memo)
+
+    })
   }
 
   async destroy() {
@@ -74,10 +85,9 @@ class Memos {
   }
 
   memos() {
-    return ['9', '10']
+    return ['13', '12', '11', '10']
   }
 }
-
 
 const memos = new Memos()
 command
