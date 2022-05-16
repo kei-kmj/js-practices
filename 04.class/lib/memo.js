@@ -1,7 +1,8 @@
 ﻿const command = require("commander")
 const Enquirer = require('enquirer')
 const util = require("util");
- // const {prompt} = require("enquirer");
+
+// const {prompt} = require("enquirer");
 
 
 function DBAccessor() {
@@ -24,36 +25,53 @@ class Memos {
   }
 
   async show() {
-    const show_list = this.memos().concat(['やめる'])
-    const question_show = {
-      type: 'select',
-      name: 'show',
-      message: '確認するメモを選んでください',
-      choices: show_list
-    }
-    if (question_show.choices === 'やめる') {
-      exit
-    } else {
-      const answer = await Enquirer.prompt(question_show)
-      const db = DBAccessor()
-      db.all('SELECT id, content from memos WHERE id = ?', answer.show, (err, rows) => {
-        if (err) {
-          console.log(err)
-          return
-        }
-        rows.forEach((row) => {
-          console.log(row.content)
+    const sqlite3 = require('sqlite3').verbose()
+    const db = new sqlite3.Database('memo.sqlite')
+    memos = []
+    const selectValue = function () {
+      return new Promise((resolve, reject) => {
+        db.all('select * from memos', (err, rows) => {
+          if (err) return reject(err)
+          resolve(rows)
         })
       })
     }
+    selectValue().then(rows => {
+      rows.forEach(row => {
+        memos.push(row.id + ':' + row.content.split('\n')[0])
+      })
+      return memos
+    }).then(async (data) => {
+      const question_show = {
+        type: 'select',
+        name: 'show',
+        message: '確認するメモを選んでください',
+        choices: data.concat('確認をやめる')
+      }
+      if (question_show.choices === '確認をやめる') {
+        exit
+      } else {
+        const answer = await Enquirer.prompt(question_show)
+        const db = DBAccessor()
+        db.all('SELECT id, content from memos WHERE id = ?', answer.show.split(':')[0], (err, rows) => {
+          if (err) {
+            console.log(err)
+            return
+          }
+          rows.forEach((row) => {
+            console.log(row.content)
+          })
+        })
+      }
+    })
   }
 
   create() {
-
     process.stdin.resume()
     process.stdin.setEncoding('utf8')
     let new_memo = ''
-    console.log('新しいメモを作成します')
+    console.log('新しいメモを作成します' +'\n' +
+        '(Enter入力後にControl+Dで登録、中止する場合はControl+C)')
     process.stdin.on('data', function (chunk) {
       new_memo += chunk
     })
@@ -67,29 +85,43 @@ class Memos {
   }
 
   async destroy() {
-    const destroy_list = this.memos().concat(['削除をやめる'])
-    const question_destroy = {
-      type: 'select',
-      name: 'destroy',
-      message: '削除するメモを選んでください',
-      choices: destroy_list
+    const sqlite3 = require('sqlite3').verbose()
+    const db = new sqlite3.Database('memo.sqlite')
+    memos = []
+    const selectValue = function () {
+      return new Promise((resolve, reject) => {
+        db.all('select * from memos', (err, rows) => {
+          if (err) return reject(err)
+          resolve(rows)
+        })
+      })
     }
-    if (question_destroy.choices === '削除をやめる') {
-      exit
-    } else {
-      const answer = await Enquirer.prompt(question_destroy)
-      const db = DBAccessor()
-      const dbRun = util.promisify(db.run.bind(db))
-      await dbRun('DELETE FROM memos WHERE id = ?', answer.destroy)
-    }
-  }
-
-  memos() {
-    return ['13', '12', '11', '10']
+    selectValue().then(rows => {
+      rows.forEach(row => {
+        memos.push(row.id + ':' + row.content.split('\n')[0])
+      })
+      return memos
+    }).then(async (data) => {
+      const question_destroy = {
+        type: 'select',
+        name: 'destroy',
+        message: '削除するメモを選んでください',
+        choices: data.concat(['削除をやめる'])
+      }
+      if (question_destroy.choices === '削除をやめる') {
+        exit
+      } else {
+        const answer = await Enquirer.prompt(question_destroy)
+        const db = DBAccessor()
+        const dbRun = util.promisify(db.run.bind(db))
+        await dbRun('DELETE FROM memos WHERE id = ?', answer.destroy.split(':')[0])
+      }
+    })
   }
 }
 
-const memos = new Memos()
+
+let memos = new Memos()
 command
     .option('-l, --lines')
     .option('-r, --read')
