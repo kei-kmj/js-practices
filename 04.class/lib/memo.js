@@ -1,9 +1,9 @@
-﻿const command = require("commander")
+const command = require('commander')
 const Enquirer = require('enquirer')
-const util = require("util");
+const util = require('util')
 
 class Memos {
-  index() {
+  list () {
     const sqlite3 = require('sqlite3').verbose()
     const db = new sqlite3.Database('memo.sqlite')
     db.all('SELECT id, content from memos', (err, rows) => {
@@ -17,7 +17,7 @@ class Memos {
     })
   }
 
-  async show() {
+  async show () {
     const sqlite3 = require('sqlite3').verbose()
     const db = new sqlite3.Database('memo.sqlite')
     memos = []
@@ -35,51 +35,52 @@ class Memos {
       })
       return memos
     }).then(async (data) => {
-      const question_show = {
+      const questionShow = {
         type: 'select',
         name: 'show',
         message: '確認するメモを選んでください',
         choices: data.concat('確認をやめる')
       }
-      if (question_show.choices === '確認をやめる') {
-        exit
-      } else {
-        const answer = await Enquirer.prompt(question_show)
-        const sqlite3 = require('sqlite3').verbose()
-        const db = new sqlite3.Database('memo.sqlite')
-        db.all('SELECT id, content from memos WHERE id = ?', answer.show.split(':')[0], (err, rows) => {
-          if (err) {
-            console.log(err)
-            return
-          }
-          rows.forEach((row) => {
-            console.log(row.content)
-          })
+      const answer = await Enquirer.prompt(questionShow)
+      const sqlite3 = require('sqlite3').verbose()
+      const db = new sqlite3.Database('memo.sqlite')
+      db.all('SELECT id, content from memos WHERE id = ?', answer.show.split(':')[0], (err, rows) => {
+        if (err) {
+          console.log(err)
+          return
+        }
+        rows.forEach((row) => {
+          console.log(row.content)
         })
+      })
+      if (answer.show === '確認をやめる') {
+        console.log('処理を中止しました')
       }
     })
   }
 
-  create() {
+  create () {
     process.stdin.resume()
     process.stdin.setEncoding('utf8')
-    let new_memo = ''
-    console.log('新しいメモを作成します' +'\n' +
+    let newMemo = ''
+    console.log('新しいメモを作成します' + '\n' +
         '(Enter入力後にControl+Dで登録、中止する場合はControl+C)')
     process.stdin.on('data', function (chunk) {
-      new_memo += chunk
+      newMemo += chunk
     })
 
     process.stdin.on('end', async function () {
       const sqlite3 = require('sqlite3').verbose()
       const db = new sqlite3.Database('memo.sqlite')
       const statement = db.prepare('INSERT INTO memos (content) VALUES(?)')
-      await util.promisify(statement.run.bind(statement))(new_memo)
-
+      await util.promisify(statement.run.bind(statement))(newMemo)
+      if (newMemo !== []) {
+        console.log('メモを登録しました')
+      }
     })
   }
 
-  async destroy() {
+  async destroy () {
     const sqlite3 = require('sqlite3').verbose()
     const db = new sqlite3.Database('memo.sqlite')
     memos = []
@@ -97,38 +98,38 @@ class Memos {
       })
       return memos
     }).then(async (data) => {
-      const question_destroy = {
+      const questionDestroy = {
         type: 'select',
         name: 'destroy',
         message: '削除するメモを選んでください',
-        choices: data.concat(['削除をやめる'])
+        choices: data.concat('削除をやめる')
       }
-      if (question_destroy.choices === '削除をやめる') {
-        exit
+      const answer = await Enquirer.prompt(questionDestroy)
+      const sqlite3 = require('sqlite3').verbose()
+      const db = new sqlite3.Database('memo.sqlite')
+      const dbRun = util.promisify(db.run.bind(db))
+      if (answer.destroy === '削除をやめる') {
+        console.log('処理を中止しました')
       } else {
-        const answer = await Enquirer.prompt(question_destroy)
-        const sqlite3 = require('sqlite3').verbose()
-        const db = new sqlite3.Database('memo.sqlite')
-        const dbRun = util.promisify(db.run.bind(db))
-        await dbRun('DELETE FROM memos WHERE id = ?', answer.destroy.split(':')[0])
+        console.log(`${answer.destroy}を削除しました`)
       }
+      dbRun('DELETE FROM memos WHERE id = ?', answer.destroy.split(':')[0])
     })
   }
 }
 
-
 let memos = new Memos()
 command
-    .option('-l, --lines')
-    .option('-r, --read')
-    .option('-d, --destroy')
+  .option('-l, --list')
+  .option('-r, --read')
+  .option('-d, --destroy')
 
 command.parse(process.argv)
 
 const options = command.opts()
 
-if (options.lines) {
-  memos.index()
+if (options.list) {
+  memos.list()
 } else if (options.read) {
   memos.show()
 } else if (options.destroy) {
