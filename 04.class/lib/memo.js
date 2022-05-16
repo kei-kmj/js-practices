@@ -2,17 +2,10 @@
 const Enquirer = require('enquirer')
 const util = require("util");
 
-// const {prompt} = require("enquirer");
-
-
-function DBAccessor() {
-  const sqlite3 = require('sqlite3').verbose()
-  return new sqlite3.Database('memo.sqlite');
-}
-
 class Memos {
   index() {
-    const db = DBAccessor()
+    const sqlite3 = require('sqlite3').verbose()
+    const db = new sqlite3.Database('memo.sqlite')
     db.all('SELECT id, content from memos', (err, rows) => {
       if (err) {
         console.log(err)
@@ -52,7 +45,8 @@ class Memos {
         exit
       } else {
         const answer = await Enquirer.prompt(question_show)
-        const db = DBAccessor()
+        const sqlite3 = require('sqlite3').verbose()
+        const db = new sqlite3.Database('memo.sqlite')
         db.all('SELECT id, content from memos WHERE id = ?', answer.show.split(':')[0], (err, rows) => {
           if (err) {
             console.log(err)
@@ -77,7 +71,8 @@ class Memos {
     })
 
     process.stdin.on('end', async function () {
-      const db = DBAccessor()
+      const sqlite3 = require('sqlite3').verbose()
+      const db = new sqlite3.Database('memo.sqlite')
       const statement = db.prepare('INSERT INTO memos (content) VALUES(?)')
       await util.promisify(statement.run.bind(statement))(new_memo)
 
@@ -112,7 +107,8 @@ class Memos {
         exit
       } else {
         const answer = await Enquirer.prompt(question_destroy)
-        const db = DBAccessor()
+        const sqlite3 = require('sqlite3').verbose()
+        const db = new sqlite3.Database('memo.sqlite')
         const dbRun = util.promisify(db.run.bind(db))
         await dbRun('DELETE FROM memos WHERE id = ?', answer.destroy.split(':')[0])
       }
