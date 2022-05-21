@@ -3,9 +3,13 @@ const Enquirer = require('enquirer')
 const util = require('util')
 
 class Memos {
-  list () {
+  dbAccessor () {
     const sqlite3 = require('sqlite3').verbose()
-    const db = new sqlite3.Database('memo.sqlite')
+    return new sqlite3.Database('memo.sqlite')
+  }
+
+  list () {
+    const db = this.dbAccessor()
     db.all('SELECT id, content from memos', (err, rows) => {
       if (err) {
         console.log(err)
@@ -18,8 +22,7 @@ class Memos {
   }
 
   async show () {
-    const sqlite3 = require('sqlite3').verbose()
-    const db = new sqlite3.Database('memo.sqlite')
+    const db = this.dbAccessor()
     memos = []
     const selectValue = function () {
       return new Promise((resolve, reject) => {
@@ -42,8 +45,7 @@ class Memos {
         choices: data.concat('確認をやめる')
       }
       const answer = await Enquirer.prompt(questionShow)
-      const sqlite3 = require('sqlite3').verbose()
-      const db = new sqlite3.Database('memo.sqlite')
+      const db = this.dbAccessor()
       db.all('SELECT id, content from memos WHERE id = ?', answer.show.split(':')[0], (err, rows) => {
         if (err) {
           console.log(err)
@@ -60,6 +62,12 @@ class Memos {
   }
 
   create () {
+    const db = this.dbAccessor()
+    db.run(`CREATE TABLE IF NOT EXISTS memos
+            (
+                id      INTEGER PRIMARY KEY,
+                content TEXT NOT NULL)`)
+
     process.stdin.resume()
     process.stdin.setEncoding('utf8')
     let newMemo = ''
@@ -70,8 +78,6 @@ class Memos {
     })
 
     process.stdin.on('end', async function () {
-      const sqlite3 = require('sqlite3').verbose()
-      const db = new sqlite3.Database('memo.sqlite')
       const statement = db.prepare('INSERT INTO memos (content) VALUES(?)')
       await util.promisify(statement.run.bind(statement))(newMemo)
       if (newMemo !== []) {
@@ -81,8 +87,7 @@ class Memos {
   }
 
   async destroy () {
-    const sqlite3 = require('sqlite3').verbose()
-    const db = new sqlite3.Database('memo.sqlite')
+    const db = this.dbAccessor()
     memos = []
     const selectValue = function () {
       return new Promise((resolve, reject) => {
@@ -105,8 +110,6 @@ class Memos {
         choices: data.concat('削除をやめる')
       }
       const answer = await Enquirer.prompt(questionDestroy)
-      const sqlite3 = require('sqlite3').verbose()
-      const db = new sqlite3.Database('memo.sqlite')
       const dbRun = util.promisify(db.run.bind(db))
       if (answer.destroy === '削除をやめる') {
         console.log('処理を中止しました')
