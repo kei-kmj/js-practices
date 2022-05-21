@@ -137,6 +137,6 @@ if (options.list) {
   memos.show()
 } else if (options.destroy) {
   memos.destroy()
-} else if (options.args === undefined) {
+} else {
   memos.create()
 }
