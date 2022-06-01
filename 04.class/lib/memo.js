@@ -4,8 +4,7 @@ const sqlite3 = require('sqlite3').verbose()
 const db = new sqlite3.Database('memo.sqlite')
 
 class Memos {
-
-  operate() {
+  operate () {
     db.run(`CREATE TABLE IF NOT EXISTS memos
             (
                 id      INTEGER PRIMARY KEY,
@@ -25,7 +24,7 @@ class Memos {
     })
   }
 
-  list() {
+  list () {
     db.all('SELECT id, content FROM memos', (err, rows) => {
       if (err) {
         console.log(err)
@@ -37,8 +36,8 @@ class Memos {
     })
   }
 
-  show() {
-    memos = []
+  show () {
+    const selectionItem = []
     db.all('SELECT * FROM memos', async (err, rows) => {
       if (err) {
         console.log(err)
@@ -46,14 +45,14 @@ class Memos {
       }
 
       rows.forEach(row => {
-        memos.push(`${row.id}:${row.content.split('\n')[0]}`)
+        selectionItem.push(`${row.id}:${row.content.split('\n')[0]}`)
       })
 
       const questionShow = {
         type: 'select',
         name: 'show',
         message: '確認するメモを選んでください',
-        choices: memos.concat('確認をやめる')
+        choices: selectionItem.concat('確認をやめる')
       }
 
       const answer = await Enquirer.prompt(questionShow)
@@ -71,73 +70,9 @@ class Memos {
         })
       }
     })
-    //
-    // new Promise((resolve) => {
-    //   db.all('SELECT * FROM memos', async (err, rows) => {
-    //     if (err) {
-    //       console.log(err)
-    //       return
-    //     }
-    //     resolve(rows)
-    //
-    //     rows.forEach(row => {
-    //       selectionItems.push(`${row.id}:${row.content.split('\n')[0]}`)
-    //     })
-    //
-    //     const questionShow = {
-    //       type: 'select',
-    //       name: 'show',
-    //       message: '確認するメモを選んでください',
-    //       choices: data.concat('確認をやめる')
-    //     }
-    //
-    //     const answer = await Enquirer.prompt(questionShow)
-    //     if (answer.show === '確認をやめる') {
-    //       console.log('処理を中止しました')
-    //     } else {
-    //       db.all('SELECT id, content FROM memos WHERE id = ?', answer.show.split(':')[0], (err, rows) => {
-    //         if (err) {
-    //           console.log(err)
-    //           return
-    //         }
-    //         rows.forEach((row) => {
-    //           console.log(row.content)
-    //         })
-    //       })
-    //     }
-    //
-    //     //-->
-    //   })
-    // }).then(rows => {
-    //   rows.forEach(row => {
-    //     selectionItems.push(`${row.id}:${row.content.split('\n')[0]}`)
-    //   })
-    //   return selectionItems
-    // }).then(async (data) => {
-    //   const questionShow = {
-    //     type: 'select',
-    //     name: 'show',
-    //     message: '確認するメモを選んでください',
-    //     choices: data.concat('確認をやめる')
-    //   }
-    //   const answer = await Enquirer.prompt(questionShow)
-    //   if (answer.show === '確認をやめる') {
-    //     console.log('処理を中止しました')
-    //   } else {
-    //     db.all('SELECT id, content FROM memos WHERE id = ?', answer.show.split(':')[0], (err, rows) => {
-    //       if (err) {
-    //         console.log(err)
-    //         return
-    //       }
-    //       rows.forEach((row) => {
-    //         console.log(row.content)
-    //       })
-    //     })
-    //   }
-    // })
   }
 
-  create() {
+  create () {
     process.stdin.resume()
     process.stdin.setEncoding('utf8')
     let newMemo = ''
@@ -154,21 +89,21 @@ class Memos {
     })
   }
 
-  destroy() {
-    memos = []
+  destroy () {
+    const selectionItem = []
     db.all('SELECT * FROM memos', async (err, rows) => {
       if (err) {
         console.log(err)
         return
       }
       rows.forEach(row => {
-        memos.push(`${row.id}:${row.content.split('\n')[0]}`)
+        selectionItem.push(`${row.id}:${row.content.split('\n')[0]}`)
       })
       const questionDestroy = {
         type: 'select',
         name: 'destroy',
         message: '削除するメモを選んでください',
-        choices: memos.concat('削除をやめる')
+        choices: selectionItem.concat('削除をやめる')
       }
       const answer = await Enquirer.prompt(questionDestroy)
       const dbRun = db.run.bind(db)
@@ -182,48 +117,14 @@ class Memos {
   }
 }
 
-//   destroy() {
-//     memos = []
-//     new Promise((resolve) => {
-//       db.all('SELECT * FROM memos', (err, rows) => {
-//         if (err) {
-//           console.log(err)
-//           return
-//         }
-//         resolve(rows)
-//       })
-//     }).then(rows => {
-//       rows.forEach(row => {
-//         memos.push(row.id + ':' + row.content.split('\n')[0])
-//       })
-//       return memos
-//     }).then(async (data) => {
-//       const questionDestroy = {
-//         type: 'select',
-//         name: 'destroy',
-//         message: '削除するメモを選んでください',
-//         choices: data.concat('削除をやめる')
-//       }
-//       const answer = await Enquirer.prompt(questionDestroy)
-//       const dbRun = db.run.bind(db)
-//       if (answer.destroy === '削除をやめる') {
-//         console.log('処理を中止しました')
-//       } else {
-//         console.log(`${answer.destroy}を削除しました`)
-//       }
-//       dbRun('DELETE FROM memos WHERE id = ?', answer.destroy.split(':')[0])
-//     })
-//   }
-// }
-
-let memos = new Memos()
+const memos = new Memos()
 memos.operate()
 
-function switchOperation() {
+function switchOperation () {
   command
-      .option('-l, --list')
-      .option('-r, --read')
-      .option('-d, --destroy')
+    .option('-l, --list')
+    .option('-r, --read')
+    .option('-d, --destroy')
 
   command.parse(process.argv)
 
