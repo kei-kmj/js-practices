@@ -70,8 +70,6 @@ class Memos {
           })
         })
       }
-
-      //-->
     })
     //
     // new Promise((resolve) => {
@@ -158,29 +156,23 @@ class Memos {
 
   destroy() {
     memos = []
-    new Promise((resolve) => {
-      db.all('SELECT * FROM memos', (err, rows) => {
-        if (err) {
-          console.log(err)
-          return
-        }
-        resolve(rows)
-      })
-    }).then(rows => {
+    db.all('SELECT * FROM memos', async (err, rows) => {
+      if (err) {
+        console.log(err)
+        return
+      }
       rows.forEach(row => {
-        memos.push(row.id + ':' + row.content.split('\n')[0])
+        memos.push(`${row.id}:${row.content.split('\n')[0]}`)
       })
-      return memos
-    }).then(async (data) => {
       const questionDestroy = {
         type: 'select',
         name: 'destroy',
         message: '削除するメモを選んでください',
-        choices: data.concat('削除をやめる')
+        choices: memos.concat('削除をやめる')
       }
       const answer = await Enquirer.prompt(questionDestroy)
       const dbRun = db.run.bind(db)
-      if (answer.destroy === '削除をやめる') {
+      if (answer.show === '削除をやめる') {
         console.log('処理を中止しました')
       } else {
         console.log(`${answer.destroy}を削除しました`)
@@ -189,6 +181,40 @@ class Memos {
     })
   }
 }
+
+//   destroy() {
+//     memos = []
+//     new Promise((resolve) => {
+//       db.all('SELECT * FROM memos', (err, rows) => {
+//         if (err) {
+//           console.log(err)
+//           return
+//         }
+//         resolve(rows)
+//       })
+//     }).then(rows => {
+//       rows.forEach(row => {
+//         memos.push(row.id + ':' + row.content.split('\n')[0])
+//       })
+//       return memos
+//     }).then(async (data) => {
+//       const questionDestroy = {
+//         type: 'select',
+//         name: 'destroy',
+//         message: '削除するメモを選んでください',
+//         choices: data.concat('削除をやめる')
+//       }
+//       const answer = await Enquirer.prompt(questionDestroy)
+//       const dbRun = db.run.bind(db)
+//       if (answer.destroy === '削除をやめる') {
+//         console.log('処理を中止しました')
+//       } else {
+//         console.log(`${answer.destroy}を削除しました`)
+//       }
+//       dbRun('DELETE FROM memos WHERE id = ?', answer.destroy.split(':')[0])
+//     })
+//   }
+// }
 
 let memos = new Memos()
 memos.operate()
