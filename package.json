@@ -1,6 +1,8 @@
 {
   "dependencies": {
-    "commander": "^9.2.0",
-    "enquirer": "^2.3.6"
+    "commander": "^9.3.0",
+    "enquirer": "^2.3.6",
+    "sqlite3": "^5.0.8"
   }
 }
+
