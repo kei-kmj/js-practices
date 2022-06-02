@@ -110,12 +110,12 @@ class Memos {
       }
       const answer = await Enquirer.prompt(questionDestroy)
       const dbRun = db.run.bind(db)
-      if (answer.show === '削除をやめる') {
+      if (answer.destroy === '削除をやめる') {
         console.log('処理を中止しました')
       } else {
         console.log(`${answer.destroy}を削除しました`)
+        dbRun('DELETE FROM memos WHERE id = ?', answer.destroy.split(':')[0])
       }
-      dbRun('DELETE FROM memos WHERE id = ?', answer.destroy.split(':')[0])
     })
   }
 }
