@@ -123,16 +123,16 @@ class Memos {
 const memos = new Memos()
 memos.operate()
 
+command
+  .option('-l, --list')
+  .option('-r, --read')
+  .option('-d, --destroy')
+
+command.parse(process.argv)
+
+const options = command.opts()
+
 function switchOperation () {
-  command
-    .option('-l, --list')
-    .option('-r, --read')
-    .option('-d, --destroy')
-
-  command.parse(process.argv)
-
-  const options = command.opts()
-
   if (options.list) {
     memos.list()
   } else if (options.read) {
