@@ -1,16 +1,19 @@
 const command = require('commander')
 const Enquirer = require('enquirer')
 const sqlite3 = require('sqlite3').verbose()
-const db = new sqlite3.Database('memo.sqlite')
 
 class Memos {
+  static #dbAccessor () {
+    return new sqlite3.Database('memo.sqlite')
+  }
+
   operate () {
-    db.run(`CREATE TABLE IF NOT EXISTS memos
-            (
-                id      INTEGER PRIMARY KEY,
-                content TEXT NOT NULL
-            )`, () => {
-      db.get('SELECT COUNT (*) FROM memos', (err, count) => {
+    Memos.#dbAccessor().run(`CREATE TABLE IF NOT EXISTS memos
+                             (
+                                 id      INTEGER PRIMARY KEY,
+                                 content TEXT NOT NULL
+                             )`, () => {
+      Memos.#dbAccessor().get('SELECT COUNT (*) FROM memos', (err, count) => {
         if (err) {
           console.log(err)
         }
@@ -25,7 +28,7 @@ class Memos {
   }
 
   list () {
-    db.all('SELECT id, content FROM memos', (err, rows) => {
+    Memos.#dbAccessor().all('SELECT id, content FROM memos', (err, rows) => {
       if (err) {
         console.log(err)
         return
@@ -38,12 +41,11 @@ class Memos {
 
   show () {
     const selectionItem = []
-    db.all('SELECT * FROM memos', async (err, rows) => {
+    Memos.#dbAccessor().all('SELECT * FROM memos', async (err, rows) => {
       if (err) {
         console.log(err)
         return
       }
-
       rows.forEach(row => {
         selectionItem.push(`${row.id}:${row.content.split('\n')[0]}`)
       })
@@ -59,7 +61,7 @@ class Memos {
       if (answer.show === '確認をやめる') {
         console.log('処理を中止しました')
       } else {
-        db.all('SELECT id, content FROM memos WHERE id = ?', answer.show.split(':')[0], (err, rows) => {
+        Memos.#dbAccessor().all('SELECT id, content FROM memos WHERE id = ?', answer.show.split(':')[0], (err, rows) => {
           if (err) {
             console.log(err)
             return
@@ -81,7 +83,7 @@ class Memos {
       newMemo += chunk
     })
     process.stdin.on('end', async function () {
-      const statement = db.prepare('INSERT INTO memos (content) VALUES(?)')
+      const statement = Memos.#dbAccessor().prepare('INSERT INTO memos (content) VALUES(?)')
       statement.run.bind(statement)(newMemo)
       if (newMemo !== '') {
         console.log('メモを登録しました')
@@ -91,6 +93,7 @@ class Memos {
 
   destroy () {
     const selectionItem = []
+    const db = Memos.#dbAccessor()
     db.all('SELECT * FROM memos', async (err, rows) => {
       if (err) {
         console.log(err)
