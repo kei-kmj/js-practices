@@ -17,9 +17,9 @@ class Memos {
         if (err) {
           console.log(err)
         }
-        if (count['COUNT (*)'] === 0) {
+        else if (count['COUNT (*)'] === 0) {
           console.log('メモはまだありません')
-          memos.create()
+          this.create()
         } else {
           switchOperation()
         }
@@ -28,7 +28,7 @@ class Memos {
   }
 
   list () {
-    Memos.#dbAccessor().all('SELECT id, content FROM memos', (err, rows) => {
+    Memos.#dbAccessor().all('SELECT * FROM memos', (err, rows) => {
       if (err) {
         console.log(err)
         return
