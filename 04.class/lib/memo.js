@@ -82,7 +82,7 @@ class Memos {
     process.stdin.on('data', function (chunk) {
       newMemo += chunk
     })
-    process.stdin.on('end', async function () {
+    process.stdin.on('end', function () {
       const statement = Memos.#dbAccessor().prepare('INSERT INTO memos (content) VALUES(?)')
       statement.run.bind(statement)(newMemo)
       if (newMemo !== '') {
@@ -93,8 +93,16 @@ class Memos {
 
   destroy () {
     const selectionItem = []
-    const db = Memos.#dbAccessor()
-    db.all('SELECT * FROM memos', async (err, rows) => {
+    const name = 'destroy'
+    const name_ja = '削除'
+    const message = `${name_ja}するメッセージを選んでください`
+    const choiceAdd = `${name_ja}をやめる`
+
+    function getAnswerName (answer) {
+      return answer.destroy
+    }
+
+    Memos.#dbAccessor().all('SELECT * FROM memos', async (err, rows) => {
       if (err) {
         console.log(err)
         return
@@ -102,21 +110,28 @@ class Memos {
       rows.forEach(row => {
         selectionItem.push(`${row.id}:${row.content.split('\n')[0]}`)
       })
-      const questionDestroy = {
-        type: 'select',
-        name: 'destroy',
-        message: '削除するメモを選んでください',
-        choices: selectionItem.concat('削除をやめる')
-      }
+      const questionDestroy = this.displayQuestion(name, message, selectionItem, choiceAdd)
       const answer = await Enquirer.prompt(questionDestroy)
-      const dbRun = db.run.bind(db)
-      if (answer.destroy === '削除をやめる') {
-        console.log('処理を中止しました')
-      } else {
-        console.log(`${answer.destroy}を削除しました`)
-        dbRun('DELETE FROM memos WHERE id = ?', answer.destroy.split(':')[0])
-      }
+      const answerName = getAnswerName(answer)
+      this.mainProcessOfDestroy(answerName, choiceAdd, name_ja)
     })
+  }
+
+  displayQuestion (name, message, selectionItem, choiceAdd) {
+    return {
+      type: 'select',
+      name: name,
+      message: message,
+      choices: selectionItem.concat(choiceAdd)
+    }
+  }
+  mainProcessOfDestroy (answerName, ChoiceAdd, name_ja) {
+    if (answerName === ChoiceAdd) {
+      console.log(`${name_ja}を中止しました`)
+    } else {
+      console.log(`${answerName}を${name_ja}しました`)
+      Memos.#dbAccessor().run('DELETE FROM memos WHERE id = ?', answerName.split(':')[0])
+    }
   }
 }
 
