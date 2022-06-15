@@ -1,4 +1,4 @@
-const command = require('commander')
+const command = require('./commander')
 const enquirer = require('enquirer')
 const sqlite3 = require('sqlite3').verbose()
 
@@ -28,7 +28,6 @@ class Memos {
     })
 
     function switchOperation () {
-      // console.log(this.options.list)
       if (this.options.list) {
         this.#list()
       } else if (this.options.read) {
@@ -73,21 +72,6 @@ class Memos {
     }
   }
 
-  #receiveAnswer (selectionItem, process, processName, mainProcess) {
-    Memos.#dbAccessor().all('SELECT * FROM memos', async (err, rows) => {
-      if (err) {
-        console.log(err)
-        return
-      }
-      rows.forEach(row => {
-        selectionItem.push(`${row.id}:${row.content.split('\n')[0]}`)
-      })
-
-      const selected = Memos.#letChoose(process, processName, selectionItem)
-      const answer = await enquirer.prompt(selected)
-      mainProcess(answer)
-    })
-  }
 
   #create () {
     process.stdin.resume()
@@ -123,8 +107,22 @@ class Memos {
     }
   }
 
-  static
-  #letChoose (process, processName, selectionItem) {
+  #receiveAnswer (selectionItem, process, processName, mainProcess) {
+    Memos.#dbAccessor().all('SELECT * FROM memos', async (err, rows) => {
+      if (err) {
+        console.log(err)
+        return
+      }
+      rows.forEach(row => {
+        selectionItem.push(`${row.id}:${row.content.split('\n')[0]}`)
+      })
+      const selected = Memos.#letChoose(process, processName, selectionItem)
+      const answer = await enquirer.prompt(selected)
+      mainProcess(answer)
+    })
+  }
+
+  static #letChoose (process, processName, selectionItem) {
     return {
       type: 'select',
       name: process,
@@ -142,9 +140,6 @@ command
 command.parse(process.argv)
 
 const options = command.opts()
-// console.log(options)
-// const option = new Memos(options)
-// console.log(option)
 
 const memos = new Memos(options)
 memos.operate()
