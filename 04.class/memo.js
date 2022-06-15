@@ -1,4 +1,4 @@
-const command = require('./commander')
+const command = require('commander')
 const enquirer = require('enquirer')
 const sqlite3 = require('sqlite3').verbose()
 
