@@ -1,14 +1,17 @@
 const command = require('commander')
-const Enquirer = require('enquirer')
+const enquirer = require('enquirer')
 const sqlite3 = require('sqlite3').verbose()
 
-
 class Memos {
+  constructor (options) {
+    this.options = options
+  }
+
   static #dbAccessor () {
     return new sqlite3.Database('memo.sqlite')
   }
 
-  build () {
+  operate () {
     Memos.#dbAccessor().run(`CREATE TABLE IF NOT EXISTS memos
                              (
                                  id      INTEGER PRIMARY KEY,
@@ -17,16 +20,28 @@ class Memos {
       Memos.#dbAccessor().get('SELECT COUNT (*) FROM memos', (err, count) => {
         if (err) {
           console.log(err)
-        }
-        if (count['COUNT (*)'] === 0) {
+        } else if (count['COUNT (*)'] === 0) {
           console.log('メモはまだありません')
-          this.create()
-        }
+          this.#create()
+        } else switchOperation.call(this)
       })
     })
+
+    function switchOperation () {
+      // console.log(this.options.list)
+      if (this.options.list) {
+        this.#list()
+      } else if (this.options.read) {
+        this.#show()
+      } else if (this.options.destroy) {
+        this.#destroy()
+      } else {
+        this.#create()
+      }
+    }
   }
 
-  list () {
+  #list () {
     Memos.#dbAccessor().all('SELECT * FROM memos', (err, rows) => {
       if (err) {
         console.log(err)
@@ -38,33 +53,12 @@ class Memos {
     })
   }
 
-  show () {
+  #show () {
     const selectionItem = []
     const process = 'show'
     const processName = '確認'
 
-    Memos.#dbAccessor().all('SELECT * FROM memos', async (err, rows) => {
-      if (err) {
-        console.log(err)
-        return
-      }
-      rows.forEach(row => {
-        selectionItem.push(`${row.id}:${row.content.split('\n')[0]}`)
-      })
-
-      const selected = Memos.#letChoose(process, processName, selectionItem)
-      const answer = await Enquirer.prompt(selected)
-      mainProcessOfShow(answer)
-
-    })
-
-    // show {
-    //   const foo = function(){共通処理}
-    //
-    //   mainProcess(foo)
-    //
-    // }
-    //
+    this.#receiveAnswer(selectionItem, process, processName, mainProcessOfShow)
 
     function mainProcessOfShow (answer) {
       Memos.#dbAccessor().all('SELECT id, content FROM memos WHERE id = ?', answer.show.split(':')[0], (err, rows) => {
@@ -79,7 +73,23 @@ class Memos {
     }
   }
 
-  create () {
+  #receiveAnswer (selectionItem, process, processName, mainProcess) {
+    Memos.#dbAccessor().all('SELECT * FROM memos', async (err, rows) => {
+      if (err) {
+        console.log(err)
+        return
+      }
+      rows.forEach(row => {
+        selectionItem.push(`${row.id}:${row.content.split('\n')[0]}`)
+      })
+
+      const selected = Memos.#letChoose(process, processName, selectionItem)
+      const answer = await enquirer.prompt(selected)
+      mainProcess(answer)
+    })
+  }
+
+  #create () {
     process.stdin.resume()
     process.stdin.setEncoding('utf8')
     let newMemo = ''
@@ -95,24 +105,13 @@ class Memos {
     })
   }
 
-  destroy () {
+  #destroy () {
     const selectionItem = []
     const db = Memos.#dbAccessor()
     const process = 'destroy'
     const processName = '削除'
 
-    db.all('SELECT * FROM memos', async (err, rows) => {
-      if (err) {
-        console.log(err)
-        return
-      }
-      rows.forEach(row => {
-        selectionItem.push(`${row.id}:${row.content.split('\n')[0]}`)
-      })
-      const selected = Memos.#letChoose(process, processName, selectionItem)
-      const answer = await Enquirer.prompt(selected)
-      mainProcessOfDestroy(answer)
-    })
+    this.#receiveAnswer(selectionItem, process, processName, mainProcessOfDestroy)
 
     function mainProcessOfDestroy (answer) {
       if (answer.destroy === '削除をやめる') {
@@ -124,7 +123,8 @@ class Memos {
     }
   }
 
-  static #letChoose (process, processName, selectionItem) {
+  static
+  #letChoose (process, processName, selectionItem) {
     return {
       type: 'select',
       name: process,
@@ -134,7 +134,6 @@ class Memos {
   }
 }
 
-
 command
   .option('-l, --list')
   .option('-r, --read')
@@ -143,24 +142,9 @@ command
 command.parse(process.argv)
 
 const options = command.opts()
+// console.log(options)
+// const option = new Memos(options)
+// console.log(option)
 
-const memos = new Memos()
-
-new Promise((resolve => {
-  memos.build()
-  resolve()
-})).then(() =>{
-  switchOperation()
-})
-
-function switchOperation () {
-  if (options.list) {
-    memos.list()
-  } else if (options.read) {
-    memos.show()
-  } else if (options.destroy) {
-    memos.destroy()
-  } else {
-    memos.create()
-  }
-}
+const memos = new Memos(options)
+memos.operate()
