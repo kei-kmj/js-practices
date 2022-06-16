@@ -75,10 +75,13 @@ class Memos {
     process.stdin.setEncoding('utf8')
     let newMemo = ''
     console.log('新しいメモを作成します\n (Enter入力後にControl+Dで登録、中止する場合はControl+C)')
-    process.stdin.on('data', function (chunk) {
+    process.stdin.on('data', (chunk) => {
       newMemo += chunk
     })
-    process.stdin.on('end', function () {
+    process.stdin.on('end', () => {
+      if (newMemo === '') {
+        return
+      }
       Memos.#dbAccessor().prepare('INSERT INTO memos (content) VALUES(?)').run(newMemo)
       if (newMemo !== '') {
         console.log('メモを登録しました')
@@ -97,9 +100,12 @@ class Memos {
     function mainProcessOfDestroy (answer) {
       if (answer.destroy === '削除をやめる') {
         console.log('処理を中止しました')
+        return
       } else {
-        console.log(`${answer.destroy}を削除しました`)
-        db.run('DELETE FROM memos WHERE id = ?', answer.destroy.split(':')[0])
+
+        db.run('DELETE FROM memos WHERE id = ?', answer.destroy.split(':')[0],() =>{
+          console.log(`${answer.destroy}を削除しました`)
+        })
       }
     }
   }
