@@ -91,7 +91,6 @@ class Memos {
 
   #destroy () {
     const selectionItem = []
-    const db = Memos.#dbAccessor()
     const operation = 'destroy'
     const operationName = '削除'
 
@@ -103,7 +102,7 @@ class Memos {
         return
       } else {
 
-        db.run('DELETE FROM memos WHERE id = ?', answer.destroy.split(':')[0],() =>{
+        Memos.#dbAccessor().run('DELETE FROM memos WHERE id = ?', answer.destroy.split(':')[0],() =>{
           console.log(`${answer.destroy}を削除しました`)
         })
       }
