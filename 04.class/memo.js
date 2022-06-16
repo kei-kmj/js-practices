@@ -23,7 +23,7 @@ class Memos {
         } else if (count['COUNT (*)'] === 0) {
           console.log('メモはまだありません')
           this.#create()
-        } else
+        } else {
           if (this.options.list) {
             this.#list()
           } else if (this.options.read) {
@@ -33,9 +33,9 @@ class Memos {
           } else {
             this.#create()
           }
+        }
       })
     })
-
   }
 
   #list () {
