@@ -57,7 +57,7 @@ class Memos {
     const process = 'show'
     const processName = '確認'
 
-    this.#receiveAnswer(selectionItem, process, processName, mainProcessOfShow)
+    this.#askAndGetAnswer(selectionItem, process, processName, mainProcessOfShow)
 
     function mainProcessOfShow (answer) {
       Memos.#dbAccessor().all('SELECT id, content FROM memos WHERE id = ?', answer.show.split(':')[0], (err, rows) => {
@@ -71,7 +71,6 @@ class Memos {
       })
     }
   }
-
 
   #create () {
     process.stdin.resume()
@@ -95,7 +94,7 @@ class Memos {
     const process = 'destroy'
     const processName = '削除'
 
-    this.#receiveAnswer(selectionItem, process, processName, mainProcessOfDestroy)
+    this.#askAndGetAnswer(selectionItem, process, processName, mainProcessOfDestroy)
 
     function mainProcessOfDestroy (answer) {
       if (answer.destroy === '削除をやめる') {
@@ -107,7 +106,7 @@ class Memos {
     }
   }
 
-  #receiveAnswer (selectionItem, process, processName, mainProcess) {
+  #askAndGetAnswer (selectionItem, process, processName, mainProcess) {
     Memos.#dbAccessor().all('SELECT * FROM memos', async (err, rows) => {
       if (err) {
         console.log(err)
