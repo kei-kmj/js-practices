@@ -100,12 +100,11 @@ class Memos {
       if (answer.destroy === '削除をやめる') {
         console.log('処理を中止しました')
         return
-      } else {
-
-        Memos.#dbAccessor().run('DELETE FROM memos WHERE id = ?', answer.destroy.split(':')[0],() =>{
-          console.log(`${answer.destroy}を削除しました`)
-        })
       }
+
+      Memos.#dbAccessor().run('DELETE FROM memos WHERE id = ?', answer.destroy.split(':')[0], () => {
+        console.log(`${answer.destroy}を削除しました`)
+      })
     }
   }
 
