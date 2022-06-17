@@ -17,33 +17,31 @@ class Memos {
                                  id      INTEGER PRIMARY KEY,
                                  content TEXT NOT NULL
                              )`, () => {
-        Memos.#dbAccessor().get('SELECT COUNT (*) FROM memos', (err, count) => {
-            if (err) {
-              console.log(err)
-              return
-            }
-            if (count['COUNT (*)'] === 0) {
-              console.log('メモはまだありません')
-              this.#create()
-              return
-            }
-            if (this.options.list) {
-              this.#list()
-              return
-            }
-            if (this.options.read) {
-              this.#show()
-              return
-            }
-            if (this.options.destroy) {
-              this.#destroy()
-              return
-            }
-            this.#create()
-          }
-        )
-      }
-    )
+      Memos.#dbAccessor().get('SELECT COUNT (*) FROM memos', (err, count) => {
+        if (err) {
+          console.log(err)
+          return
+        }
+        if (count['COUNT (*)'] === 0) {
+          console.log('メモはまだありません')
+          this.#create()
+          return
+        }
+        if (this.options.list) {
+          this.#list()
+          return
+        }
+        if (this.options.read) {
+          this.#show()
+          return
+        }
+        if (this.options.destroy) {
+          this.#destroy()
+          return
+        }
+        this.#create()
+      })
+    })
   }
 
   #list () {
@@ -59,12 +57,10 @@ class Memos {
   }
 
   #show () {
-    //const selectionItem = []
     const operation = 'show'
     const operationName = '確認'
 
     this.#askAndGetAnswer(operation, operationName,
-
       function (answer) {
         Memos.#dbAccessor().all('SELECT id, content FROM memos WHERE id = ?', answer.show.split(':')[0], (err, rows) => {
           if (err) {
@@ -98,7 +94,6 @@ class Memos {
   }
 
   #destroy () {
-    const selectionItem = []
     const operation = 'destroy'
     const operationName = '削除'
 
