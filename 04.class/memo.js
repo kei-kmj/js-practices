@@ -86,10 +86,9 @@ class Memos {
       if (newMemo === '') {
         return
       }
-      Memos.#dbAccessor().prepare('INSERT INTO memos (content) VALUES(?)').run(newMemo)
-      if (newMemo !== '') {
+      Memos.#dbAccessor().prepare('INSERT INTO memos (content) VALUES(?)').run(newMemo, () => {
         console.log('メモを登録しました')
-      }
+      })
     })
   }
 
