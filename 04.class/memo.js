@@ -99,7 +99,7 @@ class Memos {
     const operation = 'destroy'
     const operationName = '削除'
 
-    this.#askAndGetAnswer(operation, operationName, function (answer) {
+    this.#askAndGetAnswer(operation, operationName, (answer) => {
       if (answer.destroy === '削除をやめる') {
         console.log('処理を中止しました')
         return
