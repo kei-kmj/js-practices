@@ -7,17 +7,17 @@ class Memos {
     this.options = options
   }
 
-  static #dbAccessor () {
+  #dbAccessor () {
     return new sqlite3.Database('memo.sqlite')
   }
 
   operate () {
-    Memos.#dbAccessor().run(`CREATE TABLE IF NOT EXISTS memos
-                             (
-                                 id      INTEGER PRIMARY KEY,
-                                 content TEXT NOT NULL
-                             )`, () => {
-      Memos.#dbAccessor().get('SELECT COUNT (*) FROM memos', (err, count) => {
+    this.#dbAccessor().run(`CREATE TABLE IF NOT EXISTS memos
+                            (
+                                id      INTEGER PRIMARY KEY,
+                                content TEXT NOT NULL
+                            )`, () => {
+      this.#dbAccessor().get('SELECT COUNT (*) FROM memos', (err, count) => {
         if (err) {
           console.log(err)
           return
@@ -29,23 +29,19 @@ class Memos {
         }
         if (this.options.list) {
           this.#list()
-          return
-        }
-        if (this.options.read) {
+        } else if (this.options.read) {
           this.#show()
-          return
-        }
-        if (this.options.destroy) {
+        } else if (this.options.destroy) {
           this.#destroy()
-          return
+        } else {
+          this.#create()
         }
-        this.#create()
       })
     })
   }
 
   #list () {
-    Memos.#dbAccessor().all('SELECT * FROM memos', (err, rows) => {
+    this.#dbAccessor().all('SELECT * FROM memos', (err, rows) => {
       if (err) {
         console.log(err)
         return
@@ -61,7 +57,7 @@ class Memos {
     const operationName = '確認'
 
     this.#askAndGetAnswer(operation, operationName, (answer) => {
-      Memos.#dbAccessor().all('SELECT id, content FROM memos WHERE id = ?', answer.show.split(':')[0], (err, rows) => {
+      this.#dbAccessor().all('SELECT id, content FROM memos WHERE id = ?', answer.show.split(':')[0], (err, rows) => {
         if (err) {
           console.log(err)
           return
@@ -85,7 +81,7 @@ class Memos {
       if (newMemo === '') {
         return
       }
-      Memos.#dbAccessor().prepare('INSERT INTO memos (content) VALUES(?)').run(newMemo, (err) => {
+      this.#dbAccessor().prepare('INSERT INTO memos (content) VALUES(?)').run(newMemo, (err) => {
         if (err) {
           console.log(err)
           return
@@ -105,7 +101,7 @@ class Memos {
         return
       }
 
-      Memos.#dbAccessor().run('DELETE FROM memos WHERE id = ?', answer.destroy.split(':')[0], (err) => {
+      this.#dbAccessor().run('DELETE FROM memos WHERE id = ?', answer.destroy.split(':')[0], (err) => {
         if (err) {
           console.log(err)
           return
@@ -116,7 +112,7 @@ class Memos {
   }
 
   #askAndGetAnswer (operation, operationName, mainProcess) {
-    Memos.#dbAccessor().all('SELECT * FROM memos', async (err, rows) => {
+    this.#dbAccessor().all('SELECT * FROM memos', async (err, rows) => {
       if (err) {
         console.log(err)
         return
