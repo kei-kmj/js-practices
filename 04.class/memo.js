@@ -117,15 +117,12 @@ class Memos {
   }
 
   #askAndGetAnswer (operation, operationName, mainProcess) {
-    const selectionItem = []
     Memos.#dbAccessor().all('SELECT * FROM memos', async (err, rows) => {
       if (err) {
         console.log(err)
         return
       }
-      rows.forEach(row => {
-        selectionItem.push(`${row.id}:${row.content.split('\n')[0]}`)
-      })
+      const selectionItem = rows.map(row => `${row.id}:${row.content.split('\n')[0]}`)
       const selected = Memos.#showSelection(operation, operationName, selectionItem)
       const answer = await enquirer.prompt(selected)
       mainProcess(answer)
