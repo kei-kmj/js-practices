@@ -124,8 +124,7 @@ class Memos {
     })
   }
 
-  static
-  #showSelection (operation, operationName, selectionItem) {
+  static #showSelection (operation, operationName, selectionItem) {
     return {
       type: 'select',
       name: operation,
