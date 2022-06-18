@@ -102,7 +102,11 @@ class Memos {
         return
       }
 
-      Memos.#dbAccessor().run('DELETE FROM memos WHERE id = ?', answer.destroy.split(':')[0], () => {
+      Memos.#dbAccessor().run('DELETE FROM memos WHERE id = ?', answer.destroy.split(':')[0], (err) => {
+        if (err) {
+          console.log(err)
+          return
+        }
         console.log(`${answer.destroy}を削除しました`)
       })
     })
