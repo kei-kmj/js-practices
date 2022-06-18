@@ -60,18 +60,17 @@ class Memos {
     const operation = 'show'
     const operationName = '確認'
 
-    this.#askAndGetAnswer(operation, operationName,
-      function (answer) {
-        Memos.#dbAccessor().all('SELECT id, content FROM memos WHERE id = ?', answer.show.split(':')[0], (err, rows) => {
-          if (err) {
-            console.log(err)
-            return
-          }
-          rows.forEach((row) => {
-            console.log(row.content)
-          })
+    this.#askAndGetAnswer(operation, operationName, (answer) => {
+      Memos.#dbAccessor().all('SELECT id, content FROM memos WHERE id = ?', answer.show.split(':')[0], (err, rows) => {
+        if (err) {
+          console.log(err)
+          return
+        }
+        rows.forEach((row) => {
+          console.log(row.content)
         })
       })
+    })
   }
 
   #create () {
