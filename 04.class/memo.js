@@ -13,10 +13,10 @@ class Memos {
 
   operate () {
     this.#dbAccessor().run(`CREATE TABLE IF NOT EXISTS memos
-                            (
-                                id      INTEGER PRIMARY KEY,
-                                content TEXT NOT NULL
-                            )`, () => {
+                           (
+                               id      INTEGER PRIMARY KEY,
+                               content TEXT NOT NULL
+                           )`, () => {
       this.#dbAccessor().get('SELECT COUNT (*) FROM memos', (err, count) => {
         if (err) {
           console.log(err)
