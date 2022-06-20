@@ -118,13 +118,13 @@ class Memos {
         return
       }
       const selectionItem = rows.map(row => `${row.id}:${row.content.split('\n')[0]}`)
-      const selected = Memos.#showSelection(operation, operationName, selectionItem)
+      const selected = this.#showSelection(operation, operationName, selectionItem)
       const answer = await enquirer.prompt(selected)
       mainProcess(answer)
     })
   }
 
-  static #showSelection (operation, operationName, selectionItem) {
+  #showSelection (operation, operationName, selectionItem) {
     return {
       type: 'select',
       name: operation,
