@@ -1,8 +1,29 @@
 {
+  "name": "js-practices",
+  "version": "1.0.0",
+  "description": "フィヨルドブートキャンプのJSプラクティスの提出物をまとめるリポジトリです。",
+  "main": "index.js",
+  "devDependencies": {
+    "eslint-plugin-react": "^7.29.4",
+    "standard": "^17.0.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint src"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kei-kmj/js-practices.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kei-kmj/js-practices/issues"
+  },
+  "homepage": "https://github.com/kei-kmj/js-practices#readme",
   "dependencies": {
-    "commander": "^9.3.0",
-    "enquirer": "^2.3.6",
-    "sqlite3": "^5.0.8"
+    "babel-eslint": "^10.1.0",
+    "eslint": "^8.14.0",
+    "luxon": "^2.3.2"
   }
 }
-
